@@ -10,9 +10,10 @@ function showSweetAlert() {
         confirmButtonText: 'Sí, estoy seguro'
     }).then((result) => {
         if (result.isConfirmed) {
-            return "1";
+            return "st 1";
         } else {
-            return "0";
+            return "st 2";
         }
-    );
-}
+    })
+};
+
