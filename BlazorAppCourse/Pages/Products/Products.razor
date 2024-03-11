@@ -1,0 +1,92 @@
+﻿@using BlazorAppCourse.Services
+@using BlazorAppCourse.Models
+
+@page "/product"
+@inject ILogger<Products> logger;
+@inject IProductService productService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime JSRuntime;
+
+
+<PageTitle>Products</PageTitle>
+
+<h1>Products</h1>
+
+<button class="btn btn-primary" @onclick="GoToAddProducts">Go to addProducts</button>
+<button title="Update" class="btn btn-info" @onclick="MostrarAlerta"><span class="oi btn-outline-info"></span></button>
+
+
+@if (products?.Count() > 0 && products is not null)
+{
+    <div class="products-container">
+        @foreach (var product in products)
+        {
+            //logger.LogInformation($"log: {product.images[0].Trim('[', ']')}");
+            <div class="card">
+                <img class="card-img-top" src="@product.images[0]" alt="Product" loading="lazy" width="270" height="210">
+                @* <img class="card-img-top" src="@product.images[0].Trim('[', ']')" alt="Product" loading="lazy" width="270" height="210"> *@
+                <div class="card-body">
+                    <h4><b>@product.title</b></h4>
+                    <p>@product.price.ToString("C")</p>
+                    <button title="Delete" class="btn btn-danger btn-delete" @onclick="@(() => deleteProducts(product))"><span class="oi oi-trash"></span></button>
+                    <button title="Update" class="btn btn-info" @onclick="@(() => GoToUpdateProducts(product.id))"><span class="oi btn-outline-info"></span></button>
+                </div>
+            </div>
+        }
+    </div>
+}
+else{
+    <p>No existen productos</p>
+}
+
+
+@code {
+
+    private List<Product>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProducts();
+    }
+
+    public async Task GetProducts()
+    {
+        products = await productService.getProductsAsync();
+    }
+
+    private void GoToAddProducts()
+    {
+        navigationManager.NavigateTo("/addProduct");
+    }
+
+    private async Task deleteProducts(Product product)
+    {
+        var confirmation = await JSRuntime.InvokeAsync<bool>("confirm", $"esta seguro que desea eliminar {product.title}?");
+        if (!confirmation)
+        {
+            return;
+        }
+        await productService.deleteProductsAsync(product.id);
+        await GetProducts();
+    }
+
+    private void GoToUpdateProducts(int productId)
+    {
+        navigationManager.NavigateTo($"/updateProduct/{productId}");
+    }
+
+    private async Task MostrarAlerta()
+    {
+        //await JSRuntime.InvokeVoidAsync("showSweetAlert", "¡Hola!", "¡Esto es una alerta con SweetAlert!", "success");
+        var confirmation = await JSRuntime.InvokeAsync<string>("showSweetAlert");
+        Console.WriteLine($"confirmacion: {confirmation}");
+        // if (!confirmation)
+        // {
+        //     return;
+        // }
+        // GoToAddProducts();
+    }
+}
+
+<script src="alerts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -1,0 +1,12 @@
+﻿@page "/"
+@inject IConfiguration config
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello!</h1>
+<h1>@config["val_1"]</h1>
+<h1>@config["apiUrl"]</h1>
+
+Welcome to your new app.
+<br />
+@config["val_1"]

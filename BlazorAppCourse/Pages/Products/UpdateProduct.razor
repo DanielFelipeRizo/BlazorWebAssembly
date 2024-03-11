@@ -1,0 +1,115 @@
+﻿@using BlazorAppCourse.Services
+@using BlazorAppCourse.Models
+
+@page "/updateProduct/{currentProductIdParameter}"
+@inject IProductService productService;
+@inject ICategoryService categoryService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime JSRuntime;
+@inject ILogger<Counter> logger;
+
+<PageTitle>Update - Product</PageTitle>
+
+<h3>UpdateProduct</h3>
+
+<button class="btn btn-primary" @onclick="GoToProducts">Go to Products</button>
+
+<EditForm Model="@product" OnSubmit="@update">
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="title" class="col-form-label">Title</label>
+            <InputText id="title" @bind-Value="product.title" required class="form-control" />
+        </div>
+        <div class="col form-group">
+            <label for="price" class="col-form-label">Price</label>
+            <InputNumber id="price" @bind-Value="product.price" min="0" required class="form-control" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col form-group">
+            <label for="category" class="col-form-label">Category</label>
+            <InputSelect id="category" @bind-Value="product.category.id" required class="form-control">
+                <option value="@product.category.id">@product.category.name</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category.id">@category.name</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col form-group">
+            <label for="image" class="col-form-label">Image (Url)</label>
+            <InputText id="image" @bind-Value="product.image" required class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="description" class="col-form-label">Description</label>
+        <InputTextArea id="description" @bind-Value="product.description" required class="form-control"></InputTextArea>
+    </div>
+
+    <hr />
+    <button class="btn btn-primary" type="submit">Update</button>
+</EditForm>
+
+@code {
+
+    private Product? product;
+
+    [Parameter]
+    public string currentProductIdParameter { get; set; } = string.Empty;
+
+    private List<Category>? categories = new List<Category>();
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue<string>(nameof(currentProductIdParameter), out var value))
+            // logger.LogInformation($"valor recibido: {value}");
+            // logger.LogInformation($"val: {value.GetType()}");
+            if (value is not null)
+            {
+                currentProductIdParameter = value;
+            }
+        await base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await getCategories();
+        int currentProductIdParameterInt = int.Parse(currentProductIdParameter);
+        Product? currentProduct = await getProductForId(currentProductIdParameterInt);
+
+        product = new Product
+        {
+            id = currentProductIdParameterInt != 0 ? currentProductIdParameterInt : 0,
+            title = currentProduct.title,
+            price = currentProduct.price,
+            description = currentProduct.description,
+            image = currentProduct.image,
+            images = currentProduct.images,
+            categoryId = currentProduct.categoryId,
+            category = currentProduct.category
+        };
+    }
+
+    // Redirige al componente "products"
+    private void GoToProducts()
+    {
+        navigationManager.NavigateTo("/product");
+    }
+
+    private async Task<List<Category>?> getCategories()
+    {
+        return await categoryService.getCategoriesAsync();
+    }
+
+    private async Task<Product?> getProductForId(int productId)
+    {
+        return await productService.getProductAsync(productId);
+    }
+
+    private async Task update()
+    {
+        product.images = new string[1] { product.image };
+        await productService.updateProductsAsync(product);
+        GoToProducts();
+    }
+}
