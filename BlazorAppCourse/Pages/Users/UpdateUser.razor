@@ -1,0 +1,105 @@
+﻿@page "/updateUser/{currentUserIdParameter}";
+@inject IUserService userService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime JSRuntime;
+@inject ILogger<User> logger;
+
+<PageTitle>Update - Users</PageTitle>
+
+<h3>Update users</h3>
+
+<button class="btn btn-primary" @onclick="GoToUsers">Go to Products</button>
+
+@if(user?.id > 0)
+{
+    <EditForm Model="@user" OnSubmit="@updateUsers">
+
+        <div class="row">
+            <div class="col-8 form-group">
+                <label for="email">Email</label>
+                <InputText id="email" @bind-Value="user.email" required class="form-control"></InputText>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-8 form-group">
+                <label for="password">Password</label>
+                <InputText id="password" @bind-Value="user.password" required class="form-control"></InputText>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-8 form-group">
+                <label for="name">Nombre</label>
+                <InputText id="name" @bind-Value="user.name" required class="form-control"></InputText>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-8 form-group">
+                <label for="role">Rol</label>
+                <InputText id="role" @bind-Value="user.role" required class="form-control"></InputText>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-8 form-group">
+                <label for="avatar">Avatar</label>
+                <InputText id="avatar" @bind-Value="user.avatar" required class="form-control"></InputText>
+            </div>
+        </div>
+        <hr />
+        <button class="btn btn-primary" type="submit">Update</button>
+    </EditForm>
+}
+else
+{
+    <p>usuario no existe</p>
+}
+
+@code {
+    private User? user;
+
+    [Parameter]
+    public string currentUserIdParameter { get; set; } = string.Empty;
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue<string>(nameof(currentUserIdParameter), out var value))
+            if (value is not null)
+            {
+                currentUserIdParameter = value;
+            }
+        await base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        int userIdParameterInt = int.Parse(currentUserIdParameter);
+        User? currentUser = await getUserForId(userIdParameterInt);
+        user = new User
+            {
+                id = userIdParameterInt != 0 ? userIdParameterInt : 0,
+                email = currentUser.email,
+                password = currentUser.password,
+                name = currentUser.name,
+                role = currentUser.role,
+                avatar = currentUser.avatar
+            };
+    }
+    private async Task<User?> getUserForId(int userId)
+    {
+        return await userService.getUserAsync(userId);
+    }
+
+    public async Task updateUsers()
+    {
+        await userService.updateUserAsync(user);
+        GoToUsers();
+    }
+
+    private void GoToUsers()
+    {
+        navigationManager.NavigateTo("/user");
+    }
+}

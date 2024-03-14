@@ -1,0 +1,67 @@
+﻿@page "/addUser";
+@inject IUserService userService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime JSRuntime;
+@inject ILogger<User> logger;
+
+<PageTitle>Add - Users</PageTitle>
+
+<h3>AddUsers</h3>
+
+<button class="btn btn-primary" @onclick="GoToUsers">Go to users</button>
+
+<EditForm Model="@user" OnSubmit="@addUsers">
+
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="email" class="col-form-label">Email</label>
+            <InputText id="email" @bind-Value="user.email" required class="form-control"></InputText>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="password" class="col-form-label">Password</label>
+            <InputText id="password" @bind-Value="user.password" required class="form-control"></InputText>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="name" class="col-form-label">Nombre</label>
+            <InputText id="name" @bind-Value="user.name" required class="form-control"></InputText>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="role" class="col-form-label">Rol</label>
+            <InputText id="role" @bind-Value="user.role" required class="form-control"></InputText>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8 form-group">
+            <label for="avatar" class="col-form-label">Avatar</label>
+            <InputText id="avatar" @bind-Value="user.avatar" required class="form-control"></InputText>
+        </div>
+    </div>
+
+    <hr />
+    <button class="btn btn-primary" type="submit">Add</button>
+</EditForm>
+
+@code {
+    private User? user = new();
+
+    public async Task addUsers()
+    {
+        await userService.addUserAsync(user);
+        GoToUsers();
+    }
+
+    private void GoToUsers()
+    {
+        navigationManager.NavigateTo("/user");
+    }
+}

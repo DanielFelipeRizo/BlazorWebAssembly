@@ -1,7 +1,4 @@
-﻿@using BlazorAppCourse.Services
-@using BlazorAppCourse.Models
-
-@page "/addProduct"
+﻿@page "/addProduct"
 @inject IProductService productService;
 @inject ICategoryService categoryService;
 @inject NavigationManager navigationManager;
@@ -70,6 +67,6 @@
         product.images = new string[1] { product.image };
 
         await productService.addProductsAsync(product);
-        navigationManager.NavigateTo("/product");
+        GoToProducts();
     }
 }

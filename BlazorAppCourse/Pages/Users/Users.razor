@@ -1,0 +1,95 @@
+﻿@page "/user";
+@inject ILogger<Users> logger;
+@inject IUserService userService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime JSRuntime;
+
+<PageTitle>Users</PageTitle>
+
+<h3>Users</h3>
+
+<button class="btn btn-primary" @onclick="GoToAddUsers">Go to add users</button>
+
+@if (users?.Count() > 0 && users is not null)
+{
+    <div class="users-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Foto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td>@user.name</td>
+                        <td>@user.email</td>
+                        <td>@user.role</td>
+                        <td>
+                        <img class="card-img-center" src="@user.avatar" alt="User" loading="lazy" width="50" height="50" onerror="this.onerror = null; this.src = 'https://deployed-image-22.web.app/image/no-photo-available.png'">
+                        </td>
+                        <td>
+                            <MudButton Variant="Variant.Filled" Color="Color.Info" @onclick="@(() => GoToUpdateUsers(user.id))">a</MudButton>
+                                
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="@(() => deleteUsers(user))">e</MudButton>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+else
+{
+    <p>No existen usuarios</p>
+}
+
+@code {
+
+    private List<User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUsers();
+    }
+
+    public async Task GetUsers()
+    {
+        users = await userService.getUsersAsync();
+
+    }
+
+    private void GoToAddUsers()
+    {
+        navigationManager.NavigateTo("/addUser");
+    }
+
+    private async Task deleteUsers(User user)
+    {
+        var confirmation = await JSRuntime.InvokeAsync<bool>("showSweetAlert", "Eliminar registro?", $"esta seguro que desea eliminar {user.name}?");
+        if (!confirmation)
+        {
+            return;
+        }
+        await userService.deleteUserAsync(user.id);
+        await GetUsers();
+    }
+
+    private void GoToUpdateUsers(int userId)
+    {
+        navigationManager.NavigateTo($"/updateUser/{userId}");
+    }
+    private void asignImages(string urlImage)
+    {
+        //if(urlImage.)
+    }
+}
+
+<script src="alerts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

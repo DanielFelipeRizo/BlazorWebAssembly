@@ -19,8 +19,15 @@ namespace BlazorAppCourse.Services
             var response = await _httpClient.GetAsync("v1/products");
             var content = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode) throw new ApplicationException(content);
-            return JsonSerializer.Deserialize<List<Product>?>(content, _serializerOptions);
+
+            List<Product>? currentListProducts= JsonSerializer.Deserialize<List<Product>?>(content, _serializerOptions);
+            foreach(Product p in currentListProducts)
+            {
+                p.images[0] = p.images[0].Trim('[', ']').Trim('"', '"');
+            }
+            return currentListProducts;
         }
+
         public async Task<Product?> getProductAsync(int productId)
         {
             var response = await _httpClient.GetAsync($"v1/products/{productId}");
